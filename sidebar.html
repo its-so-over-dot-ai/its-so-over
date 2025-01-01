@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    body {
+      margin: 0;
+      padding: 10px;
+      font-family: Arial, sans-serif;
+      background-color: #f1f1f1;
+      height: 100%;
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+    }
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    .header h2 {
+      margin: 0;
+      font-size: 16px;
+    }
+    .toggle-button {
+      background-color: #4CAF50;
+      border: none;
+      color: white;
+      padding: 5px 10px;
+      text-align: center;
+      text-decoration: none;
+      display: inline-block;
+      font-size: 12px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .sidebar {
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      flex-grow: 1;
+    }
+    .sidebar div {
+      background-color: #ffffff;
+      padding: 10px;
+      margin-bottom: 10px;
+      border-radius: 4px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    .sidebar div b {
+      color: #333333;
+    }
+    .hidden {
+      display: none;
+    }
+  </style>
+</head>
+<body id="bodyaction">
+  <div class="header">
+    <h2>Action Assistant</h2>
+    <button class="toggle-button" id="toggleSidebar">Hide</button>
+  </div>
+  <div class="sidebar" id="messageBubble">
+    <!-- Messages will appear here -->
+  </div>
+
+  <!-- Reference the external JavaScript file -->
+  <script src="sidebar.js"></script>
+</body>
+</html>

@@ -1,0 +1,26 @@
+{
+  "manifest_version": 3,
+  "name": "Action Assistant",
+  "version": "1.0",
+  "description": "Take actions based on user input after obtaining consent.",
+  "permissions": ["storage", "scripting", "activeTab"],
+  "host_permissions": ["<all_urls>"],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_popup": "popup.html"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"]
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": ["sidebar.html", "sidebar.js"],
+      "matches": ["<all_urls>"]
+    }
+  ]
+}
