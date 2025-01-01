@@ -1,4 +1,4 @@
-# Action Assistant
+# 🚀🤖 Action Assistant 
 
 ## Introduction
 Action Assistant is an open-source Chrome extension inspired by Project Mariner that empowers users to automate their browser activities seamlessly. Whether you're looking to streamline repetitive tasks, enhance your productivity, or experiment with browser automation, Action Assistant provides a powerful yet user-friendly solution—all for free.
