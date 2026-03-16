@@ -4,80 +4,280 @@
   <title>Action Assistant</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
-      width: 300px;
-      padding: 20px;
+      font-family: 'Segoe UI', Arial, sans-serif;
+      width: 420px;
+      padding: 16px;
       box-sizing: border-box;
+      margin: 0;
+      background: #fafafa;
+      color: #1a1a1a;
     }
-    h3 {
+
+    /* ── Network Search Section ── */
+    .network-section {
+      background: linear-gradient(135deg, #0a66c2 0%, #004182 100%);
+      border-radius: 10px;
+      padding: 14px;
+      margin-bottom: 16px;
+      color: white;
+    }
+    .network-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
       margin-bottom: 10px;
     }
+    .network-header h3 {
+      margin: 0;
+      font-size: 14px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .network-badge {
+      background: rgba(255,255,255,0.2);
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 500;
+    }
+    .upload-row {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 8px;
+    }
+    .upload-btn {
+      background: rgba(255,255,255,0.15);
+      border: 1px dashed rgba(255,255,255,0.4);
+      color: white;
+      padding: 6px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 11px;
+      flex-shrink: 0;
+      transition: background 0.2s;
+    }
+    .upload-btn:hover { background: rgba(255,255,255,0.25); }
+    .upload-status {
+      font-size: 11px;
+      opacity: 0.8;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    #csvFileInput { display: none; }
+
+    .search-row {
+      display: flex;
+      gap: 6px;
+    }
+    .search-input {
+      flex: 1;
+      padding: 8px 12px;
+      border: none;
+      border-radius: 6px;
+      font-size: 13px;
+      background: rgba(255,255,255,0.95);
+      color: #1a1a1a;
+      outline: none;
+    }
+    .search-input::placeholder { color: #888; }
+    .search-btn {
+      background: #fff;
+      color: #0a66c2;
+      border: none;
+      padding: 8px 14px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background 0.2s;
+    }
+    .search-btn:hover { background: #e8e8e8; }
+    .search-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    /* Results */
+    .results-container {
+      margin-top: 10px;
+      display: none;
+    }
+    .results-container.visible { display: block; }
+    .result-group {
+      margin-bottom: 8px;
+    }
+    .result-group-title {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      opacity: 0.7;
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .result-card {
+      background: rgba(255,255,255,0.12);
+      border-radius: 6px;
+      padding: 8px 10px;
+      margin-bottom: 4px;
+      font-size: 12px;
+      line-height: 1.4;
+      transition: background 0.15s;
+    }
+    .result-card:hover { background: rgba(255,255,255,0.2); }
+    .result-card a {
+      color: #7ec8e3;
+      text-decoration: none;
+      font-weight: 600;
+    }
+    .result-card a:hover { text-decoration: underline; }
+    .result-card .role {
+      opacity: 0.85;
+      font-size: 11px;
+    }
+    .result-card .reason {
+      opacity: 0.7;
+      font-size: 10px;
+      font-style: italic;
+      margin-top: 2px;
+    }
+    .searching-indicator {
+      font-size: 11px;
+      opacity: 0.8;
+      padding: 4px 0;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .spinner {
+      display: inline-block;
+      width: 12px;
+      height: 12px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Divider ── */
+    .section-divider {
+      border: none;
+      border-top: 1px solid #e0e0e0;
+      margin: 0 0 14px 0;
+    }
+
+    /* ── Action Section (existing) ── */
+    h3 { margin: 0 0 10px 0; font-size: 15px; }
     .last-action {
-      background-color: #f9f9f9;
+      background-color: #f0f0f0;
       padding: 10px;
-      border: 1px solid #ccc;
-      border-radius: 4px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
       margin-bottom: 10px;
       cursor: pointer;
+      font-size: 13px;
     }
     input[type="text"] {
       width: 100%;
       padding: 10px;
       margin-bottom: 10px;
-      border: 1px solid #ccc;
-      border-radius: 4px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
       box-sizing: border-box;
-      font-size: 14px;
+      font-size: 13px;
+      outline: none;
     }
-    button {
+    input[type="text"]:focus { border-color: #4CAF50; }
+    button.action-btn {
       width: 100%;
       padding: 10px;
       background-color: #4CAF50;
       color: white;
       border: none;
-      border-radius: 4px;
+      border-radius: 6px;
       cursor: pointer;
       font-size: 14px;
+      font-weight: 600;
+      transition: background 0.2s;
     }
-    .hidden {
-      display: none !important;
-    }
-    button:hover {
-      background-color: #45a049;
-    }
+    button.action-btn:hover { background-color: #45a049; }
+    .hidden { display: none !important; }
     .toggle-container {
       display: flex;
       align-items: center;
       margin-bottom: 10px;
+      font-size: 13px;
     }
-    .toggle-label {
-      margin-left: 10px;
-    }
+    .toggle-label { margin-left: 8px; }
     .api-key-container {
-      margin-bottom: 20px;
+      margin-bottom: 14px;
     }
     .api-key-container label {
       display: block;
-      margin-bottom: 5px;
-      font-weight: bold;
-    }
-    .api-key-container input[type="text"] {
-      width: calc(100% - 22px);
-      display: inline-block;
+      margin-bottom: 4px;
+      font-weight: 600;
+      font-size: 13px;
     }
     .api-key-container button {
       width: auto;
       margin-top: 5px;
+      padding: 6px 14px;
+      background: #555;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 12px;
     }
   </style>
 </head>
 <body>
+  <!-- ══ LinkedIn Network Search ══ -->
+  <div class="network-section" id="networkSection">
+    <div class="network-header">
+      <h3>🔗 Network Search</h3>
+      <span class="network-badge" id="connectionCount">No data</span>
+    </div>
+    <div class="upload-row">
+      <label class="upload-btn" for="csvFileInput">📂 Upload CSV</label>
+      <input type="file" id="csvFileInput" accept=".csv" />
+      <span class="upload-status" id="uploadStatus"></span>
+    </div>
+    <div class="search-row">
+      <input type="text" class="search-input" id="networkSearchInput"
+        placeholder="e.g. AI founders in London, VCs, CTOs..." />
+      <button class="search-btn" id="networkSearchBtn" disabled>Search</button>
+    </div>
+    <div class="results-container" id="resultsContainer">
+      <!-- Embedding results -->
+      <div class="result-group" id="embeddingResultsGroup">
+        <div class="result-group-title">⚡ Quick Match (keyword + similarity)</div>
+        <div id="embeddingResults"></div>
+      </div>
+      <!-- LLM results -->
+      <div class="result-group" id="llmResultsGroup">
+        <div class="result-group-title">🧠 Deep Match (AI-powered)</div>
+        <div id="llmResults">
+          <div class="searching-indicator" id="llmSearching" style="display:none">
+            <span class="spinner"></span> Analysing connections with AI...
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <hr class="section-divider" />
+
+  <!-- ══ Existing Action Section ══ -->
   <h3>Enter Action</h3>
   <div id="lastAction" class="last-action" style="display: none;">
     Last action: <span id="lastActionText"></span>
   </div>
   <input type="text" id="actionInput" placeholder="Enter action..." />
-  
+
   <div class="toggle-container">
     <input type="checkbox" id="htmlToggle" />
     <label for="htmlToggle" class="toggle-label">Send Full HTML</label>
@@ -89,7 +289,9 @@
     <button id="saveApiKey">Save API Key</button>
   </div>
 
-  <button id="saveAction">Run Action</button>
+  <button class="action-btn" id="saveAction">Run Action</button>
+
+  <script src="network.js"></script>
   <script src="popup.js"></script>
 </body>
 </html>

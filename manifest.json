@@ -19,7 +19,7 @@
   ],
   "web_accessible_resources": [
     {
-      "resources": ["sidebar.html", "sidebar.js"],
+      "resources": ["sidebar.html", "sidebar.js", "default_connections.json"],
       "matches": ["<all_urls>"]
     }
   ]
