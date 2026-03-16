@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>its so over — Network Search</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔗</text></svg>">
+  <style>
+    :root {
+      --bg: #0b0f19;
+      --surface: #141a2a;
+      --surface2: #1c2438;
+      --border: #252d44;
+      --accent: #6c8aff;
+      --accent2: #4ecdc4;
+      --text: #e4e8f1;
+      --text2: #8892a8;
+      --text3: #5a6480;
+      --danger: #ff6b6b;
+      --radius: 12px;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    /* ── Hero ── */
+    .hero {
+      text-align: center;
+      padding: 60px 20px 30px;
+      max-width: 640px;
+    }
+    .hero h1 {
+      font-size: 32px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      margin-bottom: 8px;
+    }
+    .hero h1 span { color: var(--accent); }
+    .hero p {
+      color: var(--text2);
+      font-size: 15px;
+      line-height: 1.5;
+    }
+
+    /* ── Main card ── */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      width: 100%;
+      max-width: 640px;
+      margin: 0 20px 40px;
+      overflow: hidden;
+    }
+
+    /* ── Upload bar ── */
+    .upload-bar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface2);
+    }
+    .upload-bar label {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: var(--accent);
+      color: white;
+      padding: 7px 14px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity .15s;
+      white-space: nowrap;
+    }
+    .upload-bar label:hover { opacity: .85; }
+    .upload-bar input[type="file"] { display: none; }
+    .upload-badge {
+      background: rgba(108,138,255,.15);
+      color: var(--accent);
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .upload-status {
+      color: var(--text2);
+      font-size: 12px;
+      margin-left: auto;
+    }
+
+    /* ── API Key bar ── */
+    .api-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 18px;
+      border-bottom: 1px solid var(--border);
+    }
+    .api-bar input {
+      flex: 1;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 7px 12px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      outline: none;
+    }
+    .api-bar input:focus { border-color: var(--accent); }
+    .api-bar input::placeholder { color: var(--text3); }
+    .api-bar .label {
+      color: var(--text2);
+      font-size: 11px;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    /* ── Search bar ── */
+    .search-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 16px 18px;
+    }
+    .search-bar input {
+      flex: 1;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 12px 16px;
+      border-radius: 10px;
+      font-size: 14px;
+      outline: none;
+      transition: border .15s;
+    }
+    .search-bar input:focus { border-color: var(--accent); }
+    .search-bar input::placeholder { color: var(--text3); }
+    .search-bar button {
+      background: var(--accent);
+      color: white;
+      border: none;
+      padding: 12px 22px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity .15s;
+      white-space: nowrap;
+    }
+    .search-bar button:hover { opacity: .85; }
+    .search-bar button:disabled { opacity: .35; cursor: not-allowed; }
+
+    /* ── Results ── */
+    .results { display: none; padding: 0 18px 18px; }
+    .results.visible { display: block; }
+    .result-section { margin-bottom: 16px; }
+    .result-section:last-child { margin-bottom: 0; }
+    .section-label {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .8px;
+      color: var(--text3);
+      margin-bottom: 8px;
+      padding-bottom: 6px;
+      border-bottom: 1px solid var(--border);
+    }
+    .section-label .dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+    }
+    .section-label .dot.fast { background: var(--accent2); }
+    .section-label .dot.deep { background: var(--accent); }
+
+    .result-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 10px 12px;
+      border-radius: 8px;
+      transition: background .12s;
+      margin-bottom: 2px;
+    }
+    .result-item:hover { background: var(--surface2); }
+    .result-rank {
+      color: var(--text3);
+      font-size: 12px;
+      font-weight: 700;
+      min-width: 18px;
+      padding-top: 2px;
+    }
+    .result-info { flex: 1; min-width: 0; }
+    .result-name {
+      font-weight: 600;
+      font-size: 14px;
+      color: var(--text);
+      text-decoration: none;
+      transition: color .12s;
+    }
+    .result-name:hover { color: var(--accent); }
+    .result-role {
+      color: var(--text2);
+      font-size: 12px;
+      line-height: 1.4;
+      margin-top: 1px;
+    }
+    .result-reason {
+      color: var(--accent2);
+      font-size: 11px;
+      font-style: italic;
+      margin-top: 3px;
+      line-height: 1.3;
+    }
+    .result-link {
+      flex-shrink: 0;
+      color: var(--text3);
+      font-size: 11px;
+      text-decoration: none;
+      padding: 4px 8px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      transition: all .12s;
+      align-self: center;
+    }
+    .result-link:hover {
+      color: var(--accent);
+      border-color: var(--accent);
+    }
+
+    .loading {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--text2);
+      font-size: 13px;
+      padding: 8px 0;
+    }
+    .spinner {
+      width: 14px;
+      height: 14px;
+      border: 2px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin .6s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .empty-state {
+      color: var(--text3);
+      font-size: 12px;
+      text-align: center;
+      padding: 12px;
+    }
+
+    /* ── Footer ── */
+    .footer {
+      color: var(--text3);
+      font-size: 11px;
+      padding: 0 0 30px;
+      text-align: center;
+    }
+    .footer a { color: var(--accent); text-decoration: none; }
+
+    /* ── Responsive ── */
+    @media (max-width: 500px) {
+      .hero h1 { font-size: 24px; }
+      .card { margin: 0 10px 30px; }
+      .upload-bar { flex-wrap: wrap; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="hero">
+    <h1>🔗 <span>its so over</span></h1>
+    <p>Search your LinkedIn network with AI. Upload your connections CSV, describe who you're looking for, and get instant keyword matches + deep AI-powered results.</p>
+  </div>
+
+  <div class="card">
+    <!-- Upload -->
+    <div class="upload-bar">
+      <label for="csvFile">📂 Upload CSV<input type="file" id="csvFile" accept=".csv" /></label>
+      <span class="upload-badge" id="badge">No data loaded</span>
+      <span class="upload-status" id="uploadMsg"></span>
+    </div>
+
+    <!-- API Key -->
+    <div class="api-bar">
+      <span class="label">OpenRouter Key</span>
+      <input type="password" id="apiKey" placeholder="sk-or-v1-..." />
+    </div>
+
+    <!-- Search -->
+    <div class="search-bar">
+      <input type="text" id="query" placeholder="AI founders, VCs, CTOs at fintech, people at DeepMind..." />
+      <button id="searchBtn" disabled>Search</button>
+    </div>
+
+    <!-- Results -->
+    <div class="results" id="results">
+      <div class="result-section">
+        <div class="section-label"><span class="dot fast"></span> Quick Match — keyword + similarity</div>
+        <div id="fastResults"></div>
+      </div>
+      <div class="result-section">
+        <div class="section-label"><span class="dot deep"></span> Deep Match — AI-powered</div>
+        <div id="deepResults">
+          <div class="loading" id="deepLoading" style="display:none">
+            <span class="spinner"></span> Analysing with AI...
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    Built by <a href="https://github.com/its-so-over-dot-ai" target="_blank">its-so-over-dot-ai</a>
+  </div>
+
+<script>
+(() => {
+  const LS_CONNECTIONS = "iso_connections";
+  const LS_APIKEY = "iso_openrouter_key";
+  const MAX_LLM_CANDIDATES = 80;
+
+  let connections = [];
+
+  // DOM
+  const csvFile = document.getElementById("csvFile");
+  const badge = document.getElementById("badge");
+  const uploadMsg = document.getElementById("uploadMsg");
+  const apiKeyInput = document.getElementById("apiKey");
+  const queryInput = document.getElementById("query");
+  const searchBtn = document.getElementById("searchBtn");
+  const resultsDiv = document.getElementById("results");
+  const fastResults = document.getElementById("fastResults");
+  const deepResults = document.getElementById("deepResults");
+  const deepLoading = document.getElementById("deepLoading");
+
+  // ── Init ──
+  const storedKey = localStorage.getItem(LS_APIKEY);
+  if (storedKey) apiKeyInput.value = storedKey;
+  apiKeyInput.addEventListener("change", () => {
+    localStorage.setItem(LS_APIKEY, apiKeyInput.value.trim());
+  });
+
+  // Try load from localStorage
+  try {
+    const stored = localStorage.getItem(LS_CONNECTIONS);
+    if (stored) {
+      connections = JSON.parse(stored);
+      if (connections.length > 0) onLoaded();
+    }
+  } catch {}
+
+  // If nothing stored, try loading bundled default
+  if (connections.length === 0) {
+    fetch("default_connections.json")
+      .then(r => { if (r.ok) return r.json(); throw 0; })
+      .then(data => {
+        if (data.length > 0) {
+          connections = data;
+          // Don't store 1.6MB in localStorage by default — keep in memory
+          onLoaded();
+          uploadMsg.textContent = "✅ Default loaded";
+        }
+      })
+      .catch(() => {});
+  }
+
+  // ── CSV Upload ──
+  csvFile.addEventListener("change", e => {
+    const file = e.target.files[0];
+    if (!file) return;
+    uploadMsg.textContent = "Parsing...";
+    const reader = new FileReader();
+    reader.onload = ev => {
+      const parsed = parseCSV(ev.target.result);
+      if (parsed.length === 0) { uploadMsg.textContent = "❌ No valid rows"; return; }
+      connections = parsed;
+      try { localStorage.setItem(LS_CONNECTIONS, JSON.stringify(connections)); } catch {}
+      onLoaded();
+      uploadMsg.textContent = "✅ Uploaded";
+    };
+    reader.readAsText(file);
+  });
+
+  function onLoaded() {
+    badge.textContent = `${connections.length.toLocaleString()} connections`;
+    searchBtn.disabled = false;
+  }
+
+  // ── CSV Parser ──
+  function parseCSV(raw) {
+    const lines = raw.split("\n");
+    if (lines.length < 2) return [];
+    const header = parseLine(lines[0]).map(h => h.trim().toLowerCase());
+    const ni = header.findIndex(h => h.includes("name"));
+    const pi = header.findIndex(h => h.includes("position"));
+    const ci = header.findIndex(h => h.includes("company"));
+    const ui = header.findIndex(h => h.includes("url"));
+    if (ni === -1) return [];
+    const out = [];
+    for (let i = 1; i < lines.length; i++) {
+      const l = lines[i].trim();
+      if (!l) continue;
+      const c = parseLine(l);
+      const name = (c[ni] || "").trim();
+      if (!name) continue;
+      const position = (c[pi] || "").trim();
+      const company = (c[ci] || "").trim();
+      const url = (c[ui] || "").trim();
+      out.push({ name, position, company, url, text: `${name} ${position} ${company}`.toLowerCase() });
+    }
+    return out;
+  }
+
+  function parseLine(line) {
+    const r = []; let cur = "", inQ = false;
+    for (let i = 0; i < line.length; i++) {
+      const ch = line[i];
+      if (inQ) {
+        if (ch === '"' && line[i+1] === '"') { cur += '"'; i++; }
+        else if (ch === '"') inQ = false;
+        else cur += ch;
+      } else {
+        if (ch === '"') inQ = true;
+        else if (ch === ',') { r.push(cur); cur = ""; }
+        else cur += ch;
+      }
+    }
+    r.push(cur);
+    return r;
+  }
+
+  // ── Search ──
+  searchBtn.addEventListener("click", () => runSearch());
+  queryInput.addEventListener("keydown", e => { if (e.key === "Enter") runSearch(); });
+
+  async function runSearch() {
+    const q = queryInput.value.trim();
+    if (!q || !connections.length) return;
+    searchBtn.disabled = true;
+    resultsDiv.classList.add("visible");
+    fastResults.innerHTML = "";
+    deepResults.innerHTML = "";
+    deepLoading.style.display = "flex";
+
+    // Fast search
+    const fast = keywordSearch(q, connections, 5);
+    renderResults(fastResults, fast, false);
+
+    // Deep search
+    const candidates = keywordSearch(q, connections, MAX_LLM_CANDIDATES);
+    try {
+      const deep = await llmSearch(q, candidates);
+      deepLoading.style.display = "none";
+      renderResults(deepResults, deep, true);
+    } catch (err) {
+      deepLoading.style.display = "none";
+      deepResults.innerHTML = `<div class="empty-state">❌ ${esc(err.message)}</div>`;
+    }
+    searchBtn.disabled = false;
+  }
+
+  // ── TF-IDF Keyword Search ──
+  function keywordSearch(query, data, topK) {
+    const qt = tokenize(query);
+    if (!qt.length) return [];
+    const N = data.length;
+    const df = {};
+    for (const c of data) {
+      const seen = new Set(tokenize(c.text));
+      for (const t of seen) df[t] = (df[t] || 0) + 1;
+    }
+    const scored = data.map(c => {
+      const dt = tokenize(c.text);
+      let score = 0;
+      for (const q of qt) {
+        const tf = dt.filter(t => t === q).length;
+        if (tf > 0) score += tf * Math.log(N / (1 + (df[q] || 0))) * 3;
+        const pfx = dt.filter(t => t !== q && (t.startsWith(q) || q.startsWith(t))).length;
+        if (pfx > 0) score += pfx * 1.5;
+        if (c.text.includes(q)) score += 1;
+      }
+      if (c.text.includes(query.toLowerCase())) score += 10;
+      return { ...c, score };
+    });
+    scored.sort((a, b) => b.score - a.score);
+    return scored.filter(s => s.score > 0).slice(0, topK);
+  }
+
+  function tokenize(t) {
+    return t.toLowerCase().replace(/[^\w\s]/g, " ").split(/\s+/).filter(w => w.length > 1);
+  }
+
+  // ── LLM Deep Search ──
+  async function llmSearch(query, candidates) {
+    const key = apiKeyInput.value.trim() || localStorage.getItem(LS_APIKEY);
+    if (!key) throw new Error("Enter your OpenRouter API key above");
+    localStorage.setItem(LS_APIKEY, key);
+
+    const list = candidates.map((c, i) =>
+      `${i+1}. ${c.name} | ${c.position || "N/A"} | ${c.company || "N/A"} | ${c.url}`
+    ).join("\n");
+
+    const resp = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${key}` },
+      body: JSON.stringify({
+        model: "openai/gpt-4.1-mini",
+        messages: [
+          { role: "system", content: `You are a LinkedIn network analyst. Given a search query and a list of LinkedIn connections, identify the TOP 5 most relevant people. Consider:
+- Role/title relevance to the query
+- Company prestige and relevance
+- Seniority and influence level
+- Indirect connections (e.g. "AI founders" matches CTOs at AI startups)
+- Creative matches that pure keyword search would miss
+
+Return ONLY a JSON array of exactly 5 objects:
+[{"index": <1-based from list>, "name": "...", "reason": "one-sentence why they match"}]
+
+Be creative — look for non-obvious matches.` },
+          { role: "user", content: `Search: "${query}"\n\nConnections (${candidates.length}):\n${list}` }
+        ],
+        temperature: 0.3,
+        max_tokens: 500,
+        response_format: { type: "json_object" },
+      }),
+    });
+
+    if (!resp.ok) {
+      const e = await resp.json();
+      throw new Error(e.error?.message || "API failed");
+    }
+    const data = await resp.json();
+    const content = data.choices?.[0]?.message?.content || "[]";
+    let parsed;
+    try {
+      parsed = JSON.parse(content);
+      if (!Array.isArray(parsed)) parsed = parsed.results || parsed.matches || parsed.top || Object.values(parsed)[0];
+    } catch { throw new Error("Failed to parse AI response"); }
+    if (!Array.isArray(parsed)) return [];
+    return parsed
+      .filter(r => r.index && r.index <= candidates.length)
+      .map(r => ({ ...candidates[r.index - 1], reason: r.reason || "" }))
+      .slice(0, 5);
+  }
+
+  // ── Render ──
+  function renderResults(container, results, showReason) {
+    if (!results.length) {
+      container.innerHTML = '<div class="empty-state">No matches found</div>';
+      return;
+    }
+    container.innerHTML = results.map((r, i) => `
+      <div class="result-item">
+        <span class="result-rank">${i + 1}</span>
+        <div class="result-info">
+          <a class="result-name" href="${esc(r.url)}" target="_blank">${esc(r.name)}</a>
+          <div class="result-role">${esc(r.position || "")}${r.company ? " · " + esc(r.company) : ""}</div>
+          ${showReason && r.reason ? `<div class="result-reason">${esc(r.reason)}</div>` : ""}
+        </div>
+        <a class="result-link" href="${esc(r.url)}" target="_blank">View ↗</a>
+      </div>
+    `).join("");
+  }
+
+  function esc(s) {
+    const d = document.createElement("div");
+    d.textContent = s || "";
+    return d.innerHTML;
+  }
+})();
+</script>
+</body>
+</html>
